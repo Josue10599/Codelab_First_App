@@ -1,4 +1,4 @@
-import 'package:english_words/english_words.dart' as word;
+import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 
 class RandomWords extends StatefulWidget {
@@ -7,7 +7,8 @@ class RandomWords extends StatefulWidget {
 }
 
 class _RandomWordsState extends State<RandomWords> {
-  final List<word.WordPair> _suggestions = [];
+  final List<WordPair> _suggestions = [];
+  final Set<WordPair> _saved = Set<WordPair>();
   final TextStyle _textStyle = TextStyle(
     fontSize: 16.0,
   );
@@ -17,7 +18,7 @@ class _RandomWordsState extends State<RandomWords> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Startup Name'),
-        centerTitle: true,
+        actions: <Widget>[IconButton(icon: Icon(Icons.list), onPressed: _pushSaved)],
       ),
       body: Center(
         child: _buildSuggestion(),
@@ -37,18 +38,54 @@ class _RandomWordsState extends State<RandomWords> {
         final int index = i ~/ 2; // Se as suas linhas estiverem acabando...
         if (index >= _suggestions.length) {
           //... é gerado mais 10 itens e são adicionados a lista de sugestão.
-          _suggestions.addAll(word.generateWordPairs().take(10));
+          _suggestions.addAll(generateWordPairs().take(10));
         }
         return _buildRow(_suggestions[index]);
       },
     );
   }
 
-  Widget _buildRow(word.WordPair pair) {
+  Widget _buildRow(WordPair pair) {
+    final bool alreadySaved = _saved.contains(pair);
     return ListTile(
       title: Text(
         pair.asPascalCase,
         style: _textStyle,
+      ),
+      trailing: Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.red : null,
+      ),
+      onTap: () {
+        setState(() {
+          alreadySaved ? _saved.remove(pair) : _saved.add(pair);
+        });
+      },
+    );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          final Iterable<ListTile> tiles = _saved.map((WordPair pair) =>
+              ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _textStyle,
+                ),
+              ));
+          final List<Widget> divided = ListTile.divideTiles(
+            context: context,
+            tiles: tiles,
+          ).toList();
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Sugestões Salvas'),
+            ),
+            body: ListView(children: divided),
+          );
+        },
       ),
     );
   }
