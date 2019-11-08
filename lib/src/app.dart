@@ -8,6 +8,7 @@ class StartupNamer extends StatelessWidget {
       title: 'Startup Name',
       theme: ThemeData(
         primaryColor: Colors.white,
+        accentColor: Colors.redAccent[100],
       ),
       home: RandomWords(),
     );

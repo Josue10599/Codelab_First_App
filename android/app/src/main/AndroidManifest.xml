@@ -8,7 +8,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="codelab_first_app"
+        android:label="Startup Name"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

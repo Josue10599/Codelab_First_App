@@ -17,18 +17,28 @@ class _RandomWordsState extends State<RandomWords> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Startup Name'),
-        actions: <Widget>[IconButton(icon: Icon(Icons.list), onPressed: _pushSaved)],
+        title: Text('Nomes para Startup'),
       ),
       body: Center(
         child: _buildSuggestion(),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: Icon(
+          Icons.favorite,
+          color: Colors.red,
+        ),
+        label: Text("FAVORITOS"),
+        onPressed: _pushSaved,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
   Widget _buildSuggestion() {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8.0,
+      ),
       itemBuilder: (context, i) {
         // Adiciona um widget divisor depois de uma linha da lista
         if (i.isOdd) return Divider(); //Verifica se é uma posição impar e retorna um divisor
@@ -38,7 +48,7 @@ class _RandomWordsState extends State<RandomWords> {
         final int index = i ~/ 2; // Se as suas linhas estiverem acabando...
         if (index >= _suggestions.length) {
           //... é gerado mais 10 itens e são adicionados a lista de sugestão.
-          _suggestions.addAll(generateWordPairs().take(10));
+          _suggestions.addAll(generateWordPairs().take(5));
         }
         return _buildRow(_suggestions[index]);
       },
@@ -52,15 +62,17 @@ class _RandomWordsState extends State<RandomWords> {
         pair.asPascalCase,
         style: _textStyle,
       ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
+      trailing: IconButton(
+        onPressed: () {
+          setState(() {
+            alreadySaved ? _saved.remove(pair) : _saved.add(pair);
+          });
+        },
+        highlightColor: Colors.redAccent[100],
+        splashColor: Colors.redAccent[400],
         color: alreadySaved ? Colors.red : null,
+        icon: alreadySaved ? Icon(Icons.favorite) : Icon(Icons.favorite_border),
       ),
-      onTap: () {
-        setState(() {
-          alreadySaved ? _saved.remove(pair) : _saved.add(pair);
-        });
-      },
     );
   }
 
@@ -68,13 +80,15 @@ class _RandomWordsState extends State<RandomWords> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map((WordPair pair) =>
-              ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _textStyle,
+          final Iterable<ListTile> tiles = _saved.map(
+                (WordPair pair) =>
+                ListTile(
+                  title: Text(
+                    pair.asPascalCase,
+                    style: _textStyle,
+                  ),
                 ),
-              ));
+          );
           final List<Widget> divided = ListTile.divideTiles(
             context: context,
             tiles: tiles,
